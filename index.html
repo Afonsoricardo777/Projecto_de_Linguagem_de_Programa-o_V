@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Faturação - SUPERMERCADO-RIKAMART</title>
+    <!-- Importando Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printable-area, #printable-area * {
+                visibility: visible;
+            }
+            #printable-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+
+                <!-- CABEÇALHO EM LILÁS COM IDENTIFICAÇÃO E LOGOUT -->
+                <div class="text-center mb-4 p-4 rounded shadow-sm no-print position-relative" style="background-color: #d1c4e9; color: #2e1a47;">
+                    <a href="/logout" class="btn btn-sm btn-outline-dark position-absolute top-0 end-0 m-3 fw-bold" title="Terminar Sessão">Sair 🚪</a>
+                    <h2 class="fw-bold">SUPERMERCADO-RIKAMART</h2>
+                    <p class="mb-1">Sistema de Faturação e Gestão de Atendimento Prioritário</p>
+                    <span class="badge text-white me-2" style="background-color: #7b1fa2;">Operador: {{ operador }}</span>
+                    <span class="badge bg-dark">Total de Vendas Efetuadas: {{ total_vendas }}</span>
+                </div>
+
+                <!-- Formulário -->
+                <div class="card shadow-sm border-0 mb-4 no-print">
+                    <div class="card-body p-4">
+                        <form method="POST">
+                            <div class="mb-3">
+                                <label for="nome" class="form-label fw-bold">Nome do Cliente:</label>
+                                <input type="text" class="form-control" id="nome" name="nome" required placeholder="Ex: Maria Silva">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="genero" class="form-label fw-bold">Género:</label>
+                                <select class="form-select" id="genero" name="genero" required>
+                                    <option value="" disabled selected>Selecione o género</option>
+                                    <option value="Feminino">Feminino</option>
+                                    <option value="Masculino">Masculino</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="tipo_produto" class="form-label fw-bold">Tipo de Produto Vendido:</label>
+                                <input type="text" class="form-control" id="tipo_produto" name="tipo_produto" required placeholder="Ex: Mercearia / Talho / Bebidas">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="valor_compras" class="form-label fw-bold">Valor Total das Compras (Kz):</label>
+                                <input type="number" step="0.01" class="form-control" id="valor_compras" name="valor_compras" required placeholder="Ex: 125000">
+                                <div class="form-text">Compras superiores a 100.000 Kz têm direito a 10% de bónus[cite: 1].</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="prioridade" class="form-label fw-bold">Categoria de Atendimento:</label>
+                                <select class="form-select" id="prioridade" name="prioridade" required>
+                                    <option value="Atendimento Normal">Atendimento Normal</option>
+                                    <option value="Prioritário - Mulher Grávida">Prioritário - Mulher Grávida</option>
+                                    <option value="Prioritário - Pessoa Idosa">Prioritário - Pessoa Idosa</option>
+                                    <option value="Prioritário - Pessoa com Deficiência">Prioritário - Pessoa com Deficiência</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn w-100 py-2 fw-bold text-white" style="background-color: #7b1fa2;">Gerar Fatura e Registar Atendimento</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Bloco de Resultado / Fatura -->
+                {% if resultado %}
+                <div id="printable-area" class="card shadow mb-4" style="border-color: #b39ddb !important;">
+                    <div class="card-header fw-bold d-flex justify-content-between align-items-center text-white" style="background-color: #7b1fa2;">
+                        <span>📄 Talão / Fatura #{{ resultado.numero_venda }}</span>
+                        <div>
+                            <button onclick="window.print()" class="btn btn-light btn-sm fw-bold no-print me-1" style="color: #7b1fa2;">
+                                🖨️ Imprimir
+                            </button>
+                            <button onclick="document.getElementById('printable-area').style.display='none'" class="btn btn-light btn-sm fw-bold no-print" style="color: #7b1fa2;" title="Fechar Fatura">
+                                ✖ Fechar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body bg-white font-monospace p-4">
+                        <p><strong>Data da Compra:</strong> {{ resultado.data_compra }}</p>
+                        <p><strong>N.º da Venda do Operador:</strong> #{{ resultado.numero_venda }}</p>
+                        <p><strong>Operador Responsável:</strong> {{ operador }}</p>
+                        <p><strong>Cliente:</strong> {{ resultado.nome }}</p>
+                        <p><strong>Género:</strong> {{ resultado.genero }}</p>
+                        <p><strong>Tipo de Produto:</strong> {{ resultado.tipo_produto }}</p>
+                        <p><strong>Fila de Atendimento:</strong> <span class="badge bg-info text-dark">{{ resultado.prioridade }}</span></p>
+                        <hr>
+                        <p><strong>Valor Total das Compras:</strong> {{ "{:,.2f}".format(resultado.valor_compras) }} Kz</p>
+
+                        {% if resultado.tem_bonus %}
+                            <p style="color: #6a1b9a;"><strong>Bónus Comercial Aplicado (10%):</strong> -{{ "{:,.2f}".format(resultado.bonus) }} Kz</p>
+                            <h4 class="text-primary mt-3"><strong>Valor Final a Pagar: {{ "{:,.2f}".format(resultado.valor_final) }} Kz</strong></h4>
+                            <span class="badge text-white" style="background-color: #7b1fa2;">Elegível ao bónus de compras > 100 000 Kz[cite: 1]</span>
+                        {% else %}
+                            <p class="text-muted"><strong>Bónus Comercial:</strong> Não aplicável (<= 100 000 Kz)</p>
+                            <h4 class="text-dark mt-3"><strong>Valor Final a Pagar: {{ "{:,.2f}".format(resultado.valor_compras) }} Kz</strong></h4>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

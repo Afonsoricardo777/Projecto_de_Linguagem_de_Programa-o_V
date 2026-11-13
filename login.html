@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Acesso - Sistema de Faturação</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center vh-100">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow border-0 rounded-4">
+                    <div class="card-body p-5">
+
+                        <!-- Cabeçalho Lilás -->
+                        <div class="text-center mb-4 p-3 rounded shadow-sm" style="background-color: #d1c4e9; color: #2e1a47;">
+                            <h3 class="fw-bold">Seja Bem-Vindo</h3>
+                            <p class="mb-0 small">Loja de Produtos Alimentares</p>
+                        </div>
+
+                        {% if erro %}
+                        <div class="alert alert-danger text-center py-2 small" role="alert">
+                            {{ erro }}
+                        </div>
+                        {% endif %}
+
+                        {% if sucesso %}
+                        <div class="alert alert-success text-center py-2 small" role="alert">
+                            {{ sucesso }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Formulário dinâmico (Entrar ou Registar) -->
+                        <form method="POST" id="form-auth">
+
+                            <!-- Campo para Nome Completo (Aparece apenas ao Registar) -->
+                            <div class="mb-3" id="campo-nome-completo" style="display: none;">
+                                <label for="nome_completo" class="form-label fw-bold">Nome Completo do Operário:</label>
+                                <input type="text" class="form-control" id="nome_completo" name="nome_completo" placeholder="Ex: João Manuel da Silva">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="usuario" class="form-label fw-bold">Nome de Utilizador (Login):</label>
+                                <input type="text" class="form-control" id="usuario" name="usuario" required placeholder="Ex: joao.silva">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="senha" class="form-label fw-bold">Senha:</label>
+                                <input type="password" class="form-control" id="senha" name="senha" required placeholder="Insira a senha">
+                            </div>
+
+                            <!-- Input oculto para definir a ação (entrar ou registar) -->
+                            <input type="hidden" name="acao" id="acao-input" value="entrar">
+
+                            <button type="submit" id="btn-submit" class="btn w-100 py-2 fw-bold text-white shadow-sm mb-2" style="background-color: #7b1fa2;">Entrar no Sistema</button>
+                        </form>
+
+                        <!-- Botão para alternar entre Login e Criar Conta -->
+                        <div class="text-center mt-3">
+                            <button type="button" class="btn btn-link text-decoration-none p-0 small" id="btn-alternar" onclick="alternarModo()" style="color: #7b1fa2;">
+                                Não tem conta? <b>Criar novo operador</b>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script simples para alternar o formulário entre Login e Registo -->
+    <script>
+        let modoRegisto = false;
+        function alternarModo() {
+            modoRegisto = !modoRegisto;
+            const campoNome = document.getElementById('campo-nome-completo');
+            const btnSubmit = document.getElementById('btn-submit');
+            const btnAlternar = document.getElementById('btn-alternar');
+            const acaoInput = document.getElementById('acao-input');
+
+            if (modoRegisto) {
+                campoNome.style.display = 'block';
+                document.getElementById('nome_completo').required = true;
+                btnSubmit.textContent = 'Registar Novo Operador';
+                acaoInput.value = 'registar';
+                btnAlternar.innerHTML = 'Já tem conta? <b>Fazer Login</b>';
+            } else {
+                campoNome.style.display = 'none';
+                document.getElementById('nome_completo').required = false;
+                btnSubmit.textContent = 'Entrar no Sistema';
+                acaoInput.value = 'entrar';
+                btnAlternar.innerHTML = 'Não tem conta? <b>Criar novo operador</b>';
+            }
+        }
+    </script>
+
+</body>
+</html>
